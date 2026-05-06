@@ -1,25 +1,13 @@
-# SPDX-License-Identifier: AGPL-3.0-or-later OR LicenseRef-DevAIble-Commercial
-#
-# Human Design API
-# Copyright (C) 2026 Dogan Turkuler <dogan.turkuler@gmail.com>
-# https://devaible.com
-#
-# This file is part of Human Design API, available under dual license:
-#   - AGPL-3.0 (open source): see LICENSE-AGPL
-#   - Commercial License: see LICENSE-COMMERCIAL or contact dogan.turkuler@gmail.com
-
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from .routers import general, transits, composite
 from .routers.v2 import general as general_v2
 
-# --- Read version from importlib.metadata ---
 import importlib.metadata
-
 from .utils.version import get_version
 
 __version__ = get_version()
-
-# Fallback to metadata if toml fails
 if __version__ == "0.0.0":
     try:
         __version__ = importlib.metadata.version("humandesign-api")
@@ -28,7 +16,15 @@ if __version__ == "0.0.0":
 
 app = FastAPI(title="Human Design API", version=__version__)
 
-# Include Routers
+# CORS – allows your laptop to talk to the engine
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(general.router)
 app.include_router(transits.router)
 app.include_router(composite.router)
